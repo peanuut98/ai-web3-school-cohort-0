@@ -1,0 +1,22 @@
+# Secrets — 绝对不要提交
+.env
+.env.*
+*.key
+*.pem
+*.keystore
+secrets.json
+**/private/
+
+# Common dev junk
+.DS_Store
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+
+# 临时文件
+*.log
+*.swp
+*.tmp
