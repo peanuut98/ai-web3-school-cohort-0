@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Web3 Transaction Field Explainer</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --card: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #e6e6e0;
+    --accent: #2b5cff;
+    --warn: #b94a3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  header p { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+  .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  input[type="text"] {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+  button {
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color .15s, background .15s;
+  }
+  button:hover { border-color: var(--accent); }
+  .explain-btn {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .explain-btn:hover { background: #1f4adb; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+  .presets button { padding: 6px 10px; font-size: 13px; }
+  .output { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .card h3 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .card.safety h3 { color: var(--warn); }
+  .card p { margin: 0; font-size: 15px; }
+  .empty {
+    color: var(--muted);
+    font-size: 14px;
+    padding: 20px;
+    text-align: center;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+  }
+  .matched-as {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .matched-as code {
+    background: #f0f0ea;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  footer {
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Web3 Transaction Field Explainer</h1>
+    <p>输入一个概念或交易字段，得到「一句话 / 例子 / 常见误区 / 安全提醒」四块解释。</p>
+  </header>
+
+  <div class="input-row">
+    <input id="term" type="text" placeholder="比如：Gas、Signature、From..." autocomplete="off" />
+    <button class="explain-btn" id="explainBtn">Explain</button>
+  </div>
+
+  <div class="presets" id="presets"></div>
+
+  <div id="output" class="empty">还没有输入。点上面的预设按钮试试看。</div>
+
+  <footer>
+    本页所有解释都是离线静态文本，不调用任何 API，不读任何密钥。
+  </footer>
+</div>
+<script>
+  const DATA = {
+    "gas": {
+      aliases: ["gas", "gasfee", "gas fee", "燃料费", "手续费"],
+      oneLiner: "Gas 是你为让矿工 / 验证者执行你这笔交易而付的费用，单位是 ETH（以 Gwei 计价）。",
+      example: "在 MetaMask 里发一笔 0.001 ETH 的转账，确认页除了金额还会多一个 ~0.0001 ETH 的 Gas fee — 这部分给的是网络，不是收款人。",
+      pitfall: "新手常以为 Gas = 平台抽成。其实 Gas 给的是出块的节点，不是某家公司。Gas 价格也不是固定的，链拥堵时会暴涨。",
+      safety: "签名前一定看清 Gas fee 一栏。如果一笔小额转账要花几十刀 Gas，大概率是合约调用很复杂或网络异常 — 先取消，别确认。"
+    },
+    "signature": {
+      aliases: ["signature", "sign", "sig", "签名"],
+      oneLiner: "签名是用私钥对一段数据生成的一段不可伪造的字符串，证明「这条消息确实是这个地址发的」。",
+      example: "你在 OpenSea 登录时弹出的「Sign Message」窗口 — 它没有花一分钱 Gas，只是用你的私钥签了一段消息证明你拥有这个地址。",
+      pitfall: "「签名」≠「转账」。但有些钓鱼网站会让你签一段看起来无害的消息，里面其实是「授权对方转走你所有 NFT」的指令。签名也可以很贵。",
+      safety: "永远看清签名内容。看不懂的 hex / typed data，不要签。尤其是涉及 setApprovalForAll、permit、increaseAllowance 这类关键词的。"
+    },
+    "private key": {
+      aliases: ["private key", "privatekey", "私钥", "priv key"],
+      oneLiner: "私钥是一串只有你知道的随机数，是这个地址唯一的「控制权凭证」 — 谁有私钥，谁就是这个账户。",
+      example: "助记词背后派生出的就是私钥。MetaMask 里点「Show private key」看到的那串 64 位 hex 就是它。",
+      pitfall: "「私钥泄露」≠「账户被黑客攻击」 — 在链上没有「找回密码」「申诉」这种操作，私钥泄露 = 资产已经不是你的了。",
+      safety: "私钥永远不要复制、不要截图、不要发给任何人，包括「客服」「项目方」「Claude」。凡是问你要私钥的，100% 是骗子。"
+    },
+    "smart contract": {
+      aliases: ["smart contract", "contract", "智能合约", "合约"],
+      oneLiner: "智能合约是部署在链上的一段代码 — 任何人都可以调用，按代码逻辑自动执行，不能私自改。",
+      example: "Uniswap、AAVE、ENS 这些都是合约。你「在 Uniswap 上交换代币」，本质是在调用 Uniswap 合约里某个 swap 函数。",
+      pitfall: "「合约不能改」是有前提的：很多合约是「可升级合约」，背后有 admin / proxy，部署方仍可以换实现。看到「contract」别默认它绝对中立。",
+      safety: "和不熟悉的合约交互前，先看是不是开源、是否被审计过。在 Etherscan 合约页可以看到 Verified / Audit 标记，没 verify 的合约慎点。"
+    },
+    "testnet": {
+      aliases: ["testnet", "test net", "sepolia", "goerli", "测试网"],
+      oneLiner: "Testnet 是和主网结构一样的「演练场」 — 上面的 ETH 是免费领的、没有真实价值，专门用来测试。",
+      example: "你在 MetaMask 切到 Sepolia，从 faucet 领 0.5 ETH，然后给自己发一笔自转账 — 这一切都不花真钱。",
+      pitfall: "测试网代币没有价值，但**测试网行为可能被记录**。在测试网上玩奇怪的合约也可能让钱包地址被打标，影响主网某些空投资格。",
+      safety: "学习阶段一律用 testnet。任何让你「先用主网试一下小金额」的教程，都先停下来想 5 秒：必要吗？"
+    },
+    "block explorer": {
+      aliases: ["block explorer", "explorer", "etherscan", "区块浏览器"],
+      oneLiner: "区块浏览器是一个网站（比如 Etherscan），让你能用人类可读的方式查链上每一笔交易、每个地址、每个合约。",
+      example: "把你的钱包地址粘到 https://sepolia.etherscan.io ，能看到所有发过的交易、收过的代币、调过的合约 — 链是公开账本。",
+      pitfall: "Etherscan 上能搜到地址不代表那个地址「属于某人」。地址背后是谁要靠链下信息（项目方公告、ENS 等）来推断。",
+      safety: "Etherscan 是只读工具，绝不会让你输入私钥 / 助记词。任何「在 Etherscan 验证你的钱包」需要你输入助记词的页面 100% 是钓鱼站。"
+    },
+    "from": {
+      aliases: ["from", "发送方", "from address"],
+      oneLiner: "From 是这笔交易的发起方地址 — 也就是「谁付了 Gas、谁签了名」。",
+      example: "你在 MetaMask 点确认转账，From 就是当前选中的那个钱包地址；Etherscan 上点这个 From 地址能看到它的全部历史。",
+      pitfall: "From 是签名的人，不一定是「真正的资金来源」。比如合约调用里，From 可能是合约本身，原始触发者要看 internal txs。",
+      safety: "如果你看到一笔从你的地址发出的 tx 但你没操作过，立刻把这个钱包视作已泄露 — 资产转走 + 不再使用这组助记词。"
+    },
+    "to": {
+      aliases: ["to", "接收方", "to address"],
+      oneLiner: "To 是这笔交易的目标地址 — 可以是另一个普通钱包，也可以是一个合约地址。",
+      example: "如果 To 是另一个钱包，那是普通转账；如果 To 是合约（比如 Uniswap），那是在调用合约里的某个函数。",
+      pitfall: "「这是个看起来普通的地址」≠「这是个普通钱包」。合约地址和钱包地址长得一模一样，都是 0x... 42 个字符。要在 Etherscan 上看是否标了 Contract。",
+      safety: "确认 To 地址前，至少核对前 6 位 + 后 6 位字符。剪贴板劫持木马就是专门替换 To 地址的，看一眼能救命。"
+    },
+    "value": {
+      aliases: ["value", "金额", "amount"],
+      oneLiner: "Value 是这笔交易随附的原生代币（ETH）数量，单位是 wei（1 ETH = 10¹⁸ wei）。",
+      example: "你转 0.001 ETH 给朋友，Etherscan 的 Value 字段会显示 `0.001 Ether` — 这是真正「跟着这笔 tx 一起被转走」的钱。",
+      pitfall: "Value 只统计原生币（ETH）。如果你转的是 USDC、DAI 这种 ERC-20 代币，Value 经常是 0，真正的转账金额藏在 Token Transfers 那一栏里。",
+      safety: "签名前看清 Value 字段是不是你预期的数额。Value 写成 wei 时一长串数字很容易看错 — 多出 3 位 0 就是 1000 倍。"
+    },
+    "gas used": {
+      aliases: ["gas used", "gasused", "gas消耗"],
+      oneLiner: "Gas Used 是这笔交易实际消耗的 Gas 量（不是 Gas 价格） — 反映这笔交易在链上「跑了多少计算」。",
+      example: "一笔普通 ETH 转账 Gas Used 通常是 21000；调用 Uniswap swap 的 Gas Used 大约 150,000+ — 因为合约里要做更多事。",
+      pitfall: "Gas Used × Gas Price = 你实际付的 Gas 总费用。新手常把 Gas Used 当成「我付了多少钱」 — 它只是「用了多少计算单位」。",
+      safety: "如果一笔看起来普通的转账显示 Gas Used 异常大，可能是被钓到了某个合约 — 立刻检查最近的 approve 历史。"
+    }
+  };
+
+  const PRESETS = [
+    "Gas", "Signature", "Private Key", "Smart Contract", "Testnet",
+    "Block Explorer", "From", "To", "Value", "Gas Used"
+  ];
+
+  function normalize(s) {
+    return (s || "").trim().toLowerCase().replace(/\s+/g, " ");
+  }
+
+  function lookup(input) {
+    const q = normalize(input);
+    if (!q) return null;
+    for (const key of Object.keys(DATA)) {
+      const entry = DATA[key];
+      if (entry.aliases.some(a => normalize(a) === q)) {
+        return { key, entry };
+      }
+    }
+    for (const key of Object.keys(DATA)) {
+      const entry = DATA[key];
+      if (entry.aliases.some(a => normalize(a).includes(q) || q.includes(normalize(a)))) {
+        return { key, entry };
+      }
+    }
+    return null;
+  }
+
+  function render(input) {
+    const out = document.getElementById("output");
+    const result = lookup(input);
+    if (!result) {
+      out.className = "empty";
+      out.innerHTML = `没有匹配到「${escapeHtml(input)}」。试试上面的预设按钮，或者输入：Gas / Signature / From / To / Value 等。`;
+      return;
+    }
+    const { key, entry } = result;
+    out.className = "output";
+    out.innerHTML = `
+      <p class="matched-as">已匹配为 <code>${escapeHtml(key)}</code></p>
+      <div class="card"><h3>一句话解释</h3><p>${escapeHtml(entry.oneLiner)}</p></div>
+      <div class="card"><h3>具体例子</h3><p>${escapeHtml(entry.example)}</p></div>
+      <div class="card"><h3>常见误区</h3><p>${escapeHtml(entry.pitfall)}</p></div>
+      <div class="card safety"><h3>⚠ 安全提醒</h3><p>${escapeHtml(entry.safety)}</p></div>
+    `;
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function init() {
+    const presetsEl = document.getElementById("presets");
+    PRESETS.forEach(p => {
+      const b = document.createElement("button");
+      b.textContent = p;
+      b.addEventListener("click", () => {
+        document.getElementById("term").value = p;
+        render(p);
+      });
+      presetsEl.appendChild(b);
+    });
+
+    document.getElementById("explainBtn").addEventListener("click", () => {
+      render(document.getElementById("term").value);
+    });
+
+    document.getElementById("term").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") render(e.target.value);
+    });
+  }
+
+  init();
+</script>
+</body>
+</html>
