@@ -22,7 +22,8 @@ Value / Amount：0.00005 ETH
 Block：4187498
 Timestamp：May-23-2026 08:34:44 AM +UTC
 Transaction Fee / Gas：0.00000015 ETH
-7. 人工确认步骤
+
+8. 人工确认步骤
 在发送交易前，我人工确认了以下内容：
 
 当前网络是 Base Sepolia Testnet，而不是主网。
@@ -31,5 +32,7 @@ To 地址是我创建的第二个测试地址。
 转账金额是少量测试 ETH。
 Rabby Wallet 弹窗中的 Gas 费用和交易信息符合预期。
 页面没有要求我输入私钥、助记词、API Key 或其他敏感信息。
+
+
 8. 安全说明
 本次任务只使用测试网和测试币，不涉及真实资产。我没有提交私钥、助记词、API Key、token、.env 文件或其他敏感信息。
