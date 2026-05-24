@@ -37,7 +37,7 @@ contract SimpleMessage {
 部署钱包地址	0xf4EbF4354FECD286F4e7ddA94FD7b33eeECC42FE
 部署交易哈希	0xd1b5bbf0eaf1141d1fbc68d075f23b5562bd8e39cd1ba6f64520fc972dd6dbad
 区块高度	41912964
-区块浏览器链接	[【填写 Basescan 合约地址链接】](https://sepolia.basescan.org/address/0xf4ebf4354fecd286f4e7dda94fd7b33eeecc42fe)
+区块浏览器链接	(https://sepolia.basescan.org/address/0xf4ebf4354fecd286f4e7dda94fd7b33eeecc42fe)
 
 ⸻
 
