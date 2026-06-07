@@ -26,7 +26,10 @@
 
 ## 关键里程碑（待 learning-plan 展开）
 
-- [ ] Week 2：能解释钱包 / 签名 / 合约调用的底层流程
+- [x] Week 2：能解释钱包 / 签名 / 合约调用的底层流程
 - [ ] Week 4：用 Claude Code 在测试网完成一次端到端交互（mint / transfer / call contract）
+  - [x] 部署：Day 14 Counter.sol 部到 Base Sepolia + Remix 端调一次 increment
+  - [x] 读：Day 18 Claude Code 写 ethers.js 读 Sepolia 余额（Node 端）
+  - [ ] 写：Claude Code 写 ethers.js call Counter increment（Week 4 / Day 1 开工）
 - [ ] Week 6：完成一份 AI × Web3 Bridge 主题的产品研究笔记
 - [ ] Week 8：Hackathon Demo Day 提交一个原型
